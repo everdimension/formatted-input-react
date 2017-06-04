@@ -1,0 +1,28 @@
+{
+  "name": "number-input-react",
+  "version": "0.0.1",
+  "description": "a react component for as-you-type digit grouping",
+  "main": "lib/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+ssh://git@github.com/everdimension/number-input-react.git"
+  },
+  "keywords": [
+    "react",
+    "number",
+    "input",
+    "input",
+    "formatter",
+    "react",
+    "input"
+  ],
+  "author": "everdimension@gmail.com",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/everdimension/number-input-react/issues"
+  },
+  "homepage": "https://github.com/everdimension/number-input-react#readme"
+}
