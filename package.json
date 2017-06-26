@@ -4,6 +4,8 @@
   "description": "a react component for as-you-type digit grouping",
   "main": "lib/index.js",
   "scripts": {
+    "start": "npm run cosmos",
+    "cosmos": "cosmos",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -24,5 +26,17 @@
   "bugs": {
     "url": "https://github.com/everdimension/number-input-react/issues"
   },
-  "homepage": "https://github.com/everdimension/number-input-react#readme"
+  "homepage": "https://github.com/everdimension/number-input-react#readme",
+  "devDependencies": {
+    "babel-core": "^6.24.1",
+    "babel-loader": "^7.0.0",
+    "babel-preset-react": "^6.24.1",
+    "html-webpack-plugin": "^2.28.0",
+    "prop-types": "^15.5.10",
+    "react": "^15.5.4",
+    "react-cosmos-webpack": "^2.0.0-beta.14",
+    "react-dom": "^15.5.4",
+    "text-mask-core": "^5.0.1",
+    "webpack": "^2.6.1"
+  }
 }
