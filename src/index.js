@@ -59,6 +59,7 @@ class NumberInput extends React.Component {
   }
 
   handleChange(event) {
+    this.textMaskInputElement.update();
     this.props.onChange(event.target.name, event.target.value);
   }
 
