@@ -15,9 +15,10 @@ class Controlled extends React.Component {
   }
 
   handleChange(name, value) {
+    console.log('setting state');
     this.setState({
       [name]: value,
-    });
+    }, () => console.log('handleChange in "Controlled" done'));
   }
 
   setExampleValue(event) {
@@ -32,7 +33,7 @@ class Controlled extends React.Component {
     const { value, exampleValue } = this.state;
     return (
       <div>
-        <p>Current value: {value}</p>
+        <p>Current value: {value}, {typeof value}</p>
         <p>
           <button onClick={this.setValue}>set value to</button>
           <input
