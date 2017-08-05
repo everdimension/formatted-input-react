@@ -12,11 +12,27 @@ function omit(obj, keys) {
   return newObj;
 }
 
+function isNumeric(n) {
+  return !isNaN(Number(n) - parseFloat(n));
+}
+
+function unformat(numberString) {
+  return numberString.replace(/([^\d.-]|\.(?=.*\.)|^\.|(?!^)-)/g, '');
+}
+
+function parse(numberString) {
+  const unformatted = unformat(numberString);
+  if (isNumeric(unformatted)) {
+    return Number(unformatted);
+  }
+  return null;
+}
+
 const propTypes = {};
 
 class NumberInput extends React.Component {
   static mask(inputValue = '') {
-    const cleared = inputValue.replace(/([^\d.-]|\.(?=.*\.)|^\.|(?!^)-)/g, '');
+    const cleared = unformat(inputValue);
     if (cleared === '-' || cleared === '-0' || cleared === '-0.') {
       return cleared.split('').map(l => (/\d/.test(l) ? /\d/ : l));
     }
@@ -59,8 +75,13 @@ class NumberInput extends React.Component {
   }
 
   handleChange(event) {
+    const currentValue = event.target.value;
     this.textMaskInputElement.update();
-    this.props.onChange(event.target.name, event.target.value);
+
+    const modelValue = parse(event.target.value);
+    if (modelValue !== this.props.value) {
+      this.props.onChange(event.target.name, );
+    }
   }
 
   render() {
