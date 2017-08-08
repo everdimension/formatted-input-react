@@ -31,7 +31,16 @@ function parse(numberString) {
 const propTypes = {};
 
 class NumberInput extends React.Component {
+  static clearValue(value) {
+    const cleared = unformat(value);
+    if (isNumeric(cleared)) {
+      return cleared;
+    }
+    return '';
+  }
+
   static mask(inputValue = '') {
+    console.log('mask called');
     const cleared = unformat(inputValue);
     if (cleared === '-' || cleared === '-0' || cleared === '-0.') {
       return cleared.split('').map(l => (/\d/.test(l) ? /\d/ : l));
@@ -51,8 +60,21 @@ class NumberInput extends React.Component {
     return mask;
   }
 
-  constructor() {
-    super();
+  constructor(props) {
+    super(props);
+
+    if ('value' in props && 'defaultValue' in props) {
+      console.error(
+        'Both value and defaultValue props are provided to FormattedInput. ' +
+        'Input elements must be either controlled or uncontrolled'
+      );
+    }
+
+    this.state = {
+      isControlled: 'value' in props,
+      isUncontrolled: 'defaultValue' in props,
+    };
+
     this.mount = this.mount.bind(this);
     this.handleChange = this.handleChange.bind(this);
   }
@@ -69,29 +91,35 @@ class NumberInput extends React.Component {
   }
 
   componentWillReceiveProps(nextProps) {
-    if (nextProps.value !== this.props.value) {
+    if (this.state.isControlled && nextProps.value !== this.props.value) {
       this.textMaskInputElement.update(nextProps.value);
     }
   }
 
   handleChange(event) {
-    const currentValue = event.target.value;
-    this.textMaskInputElement.update();
+    this.textMaskInputElement.update(event.target.value);
 
-    const modelValue = parse(event.target.value);
+    const modelValue = event.target.value;
     if (modelValue !== this.props.value) {
-      this.props.onChange(event.target.name, );
+      this.props.onChange(event.target.name, modelValue);
     }
   }
 
   render() {
-    const htmlProps = omit(this.props, ['value']);
+    const { value, defaultValue } = this.props;
+    const htmlProps = omit(this.props, ['value', 'defaultValue']);
+    const valueProps = {};
+    if (this.state.isControlled) {
+      valueProps.value = value;
+    } else {
+      valueProps.defaultValue = defaultValue;
+    }
     return (
       <input
         {...htmlProps}
+        {...valueProps}
         ref={this.mount}
         type="text"
-        defaultValue={this.props.value}
         onChange={this.handleChange}
       />
     );
