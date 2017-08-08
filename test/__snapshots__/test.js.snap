@@ -1,0 +1,19 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Rendering Renders a component with correct props 1`] = `
+<input
+  name="test-input"
+  onChange={[Function]}
+  type="text"
+  value=""
+/>
+`;
+
+exports[`Rendering Renders a component with correct props 2`] = `
+Object {
+  "name": "test-input",
+  "onChange": [Function],
+  "type": "text",
+  "value": "",
+}
+`;
