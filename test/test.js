@@ -32,7 +32,8 @@ describe('Rendering', () => {
   });
 });
 
-describe('Behavior', () => {
+describe('Basic behavior', () => {
+  const inputName = 'behavior-input';
   class TestingParentControlled extends React.Component {
     constructor() {
       super();
@@ -42,8 +43,9 @@ describe('Behavior', () => {
     render() {
       return (
         <NumberInput
+          name={inputName}
           value={this.state.value}
-          onChange={() => {}}
+          onChange={this.props.onChange}
         />
       );
     }
@@ -59,7 +61,7 @@ describe('Behavior', () => {
       return (
         <NumberInput
           defaultValue={this.state.value}
-          onChange={() => {}}
+          onChange={this.props.onChange}
         />
       );
     }
@@ -67,12 +69,12 @@ describe('Behavior', () => {
 
   describe('Passes updated value via onChange callback', () => {
     const recorder = {};
-    const inputName = 'test-input';
+    const name = 'test-input';
     const expectedValue = '23';
 
     const root = renderIntoDocument(
       <NumberInput
-        name={inputName}
+        name={name}
         value=""
         onChange={(name, value) => (recorder[name] = value)}
       />
@@ -85,12 +87,12 @@ describe('Behavior', () => {
     });
 
     it('passes name as the first argument value', () => {
-      expect(inputName in recorder).toBe(true);
+      expect(name in recorder).toBe(true);
     });
 
     it('passes correct value as the second argument', () => {
-      expect(typeof recorder[inputName]).toBe('string');
-      expect(recorder[inputName]).toBe(expectedValue);
+      expect(typeof recorder[name]).toBe('string');
+      expect(recorder[name]).toBe(expectedValue);
     });
   });
 
@@ -108,6 +110,43 @@ describe('Behavior', () => {
       /* pass new props to NumberInput */
       root.setState({ value: '123' });
       expect(input.value).toBe('123');
+    });
+
+    describe('Uses the onChange callback', () => {
+      const spy = jest.fn();
+      const root = renderIntoDocument(
+        <TestingParentControlled
+          onChange={spy}
+        />
+      );
+
+      const input = findRenderedDOMComponentWithTag(root, 'input');
+      input.value = String('1');
+      Simulate.change(input, {
+        target: input,
+      });
+
+      it('Invokes the onChange callback on change event', () => {
+        expect(spy).toHaveBeenCalledTimes(1);
+      });
+      it('Passes the input name and value as arguments', () => {
+        expect(spy).toHaveBeenLastCalledWith(inputName, '1');
+      });
+    });
+
+    it('Doesn\'t update when props do not change', () => {
+      const root = renderIntoDocument(
+        <TestingParentControlled
+          onChange={() => {}}
+        />
+      );
+      const input = findRenderedDOMComponentWithTag(root, 'input');
+      input.value = '123';
+      Simulate.change(input, {
+        target: input,
+      });
+
+      expect(input.value).toBe('');
     });
   });
 
