@@ -28,9 +28,12 @@ function parse(numberString) {
   return null;
 }
 
-const propTypes = {};
+const propTypes = {
+  value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+};
 
-class NumberInput extends React.Component {
+class NumberInput extends React.PureComponent {
   static clearValue(value) {
     const cleared = unformat(value);
     if (isNumeric(cleared)) {
@@ -90,13 +93,14 @@ class NumberInput extends React.Component {
     });
   }
 
-  componentWillReceiveProps(nextProps) {
-    if (this.state.isControlled && nextProps.value !== this.props.value) {
-      this.textMaskInputElement.update(nextProps.value);
+  componentDidUpdate(prevProps) {
+    if (this.state.isControlled && prevProps.value !== this.props.value) {
+      this.textMaskInputElement.update(this.props.value);
     }
   }
 
   handleChange(event) {
+    console.log('handleChange');
     this.textMaskInputElement.update(event.target.value);
 
     const modelValue = event.target.value;
