@@ -1,3 +1,4 @@
+/* global describe, it, expect */
 import React from 'react';
 import {
   Simulate,
@@ -7,13 +8,12 @@ import {
 import renderer from 'react-test-renderer';
 import NumberInput from '../src';
 
+const noop = () => {};
+
 describe('Rendering', () => {
   it('Renders a component of type "input"', () => {
     const component = renderer.create(
-      <NumberInput
-        name="test-input"
-        value=""
-      />
+      <NumberInput name="test-input" value="" onChange={noop} />,
     );
     const tree = component.toJSON();
     expect(tree.type).toBe('input');
@@ -21,63 +21,44 @@ describe('Rendering', () => {
 
   it('Renders a component with correct props', () => {
     const component = renderer.create(
-      <NumberInput
-        name="test-input"
-        value=""
-      />
+      <NumberInput name="test-input" value="" onChange={noop} />,
     );
     const tree = component.toJSON();
     expect(tree).toMatchSnapshot();
     expect(tree.props).toMatchSnapshot();
   });
+
+  it('Passses arbitrary html props to rendered input', () => {
+    const component = renderer.create(
+      <NumberInput
+        name="test-input"
+        value=""
+        data-attr="42"
+        autocomplete="false"
+        onChange={noop}
+      />,
+    );
+    const tree = component.toJSON();
+    expect(tree).toMatchSnapshot();
+    expect('data-attr' in tree.props).toBe(true);
+    expect('autocomplete' in tree.props).toBe(true);
+  });
 });
 
 describe('Basic behavior', () => {
-  const inputName = 'behavior-input';
-  class TestingParentControlled extends React.Component {
-    constructor() {
-      super();
-      this.state = { value: '' };
-    }
-
-    render() {
-      return (
-        <NumberInput
-          name={inputName}
-          value={this.state.value}
-          onChange={this.props.onChange}
-        />
-      );
-    }
-  }
-
-  class TestingParentUncontrolled extends React.Component {
-    constructor() {
-      super();
-      this.state = { value: '' };
-    }
-
-    render() {
-      return (
-        <NumberInput
-          defaultValue={this.state.value}
-          onChange={this.props.onChange}
-        />
-      );
-    }
-  }
-
   describe('Passes updated value via onChange callback', () => {
     const recorder = {};
-    const name = 'test-input';
+    const fieldName = 'test-input';
     const expectedValue = '23';
 
     const root = renderIntoDocument(
       <NumberInput
-        name={name}
+        name={fieldName}
         value=""
-        onChange={(name, value) => (recorder[name] = value)}
-      />
+        onChange={(name, value) => {
+          recorder[name] = value;
+        }}
+      />,
     );
 
     const input = findRenderedDOMComponentWithTag(root, 'input');
@@ -87,83 +68,12 @@ describe('Basic behavior', () => {
     });
 
     it('passes name as the first argument value', () => {
-      expect(name in recorder).toBe(true);
+      expect(fieldName in recorder).toBe(true);
     });
 
     it('passes correct value as the second argument', () => {
-      expect(typeof recorder[name]).toBe('string');
-      expect(recorder[name]).toBe(expectedValue);
-    });
-  });
-
-  describe('Controlled input', () => {
-    it('Updates when new props are received', () => {
-      const root = renderIntoDocument(
-        <TestingParentControlled />
-      );
-      const input = findRenderedDOMComponentWithTag(root, 'input');
-
-      /* component was not yet updated */
-      expect(root.state.value).toBe('');
-      expect(input.value).toBe('');
-
-      /* pass new props to NumberInput */
-      root.setState({ value: '123' });
-      expect(input.value).toBe('123');
-    });
-
-    describe('Uses the onChange callback', () => {
-      const spy = jest.fn();
-      const root = renderIntoDocument(
-        <TestingParentControlled
-          onChange={spy}
-        />
-      );
-
-      const input = findRenderedDOMComponentWithTag(root, 'input');
-      input.value = String('1');
-      Simulate.change(input, {
-        target: input,
-      });
-
-      it('Invokes the onChange callback on change event', () => {
-        expect(spy).toHaveBeenCalledTimes(1);
-      });
-      it('Passes the input name and value as arguments', () => {
-        expect(spy).toHaveBeenLastCalledWith(inputName, '1');
-      });
-    });
-
-    it('Doesn\'t update when props do not change', () => {
-      const root = renderIntoDocument(
-        <TestingParentControlled
-          onChange={() => {}}
-        />
-      );
-      const input = findRenderedDOMComponentWithTag(root, 'input');
-      input.value = '123';
-      Simulate.change(input, {
-        target: input,
-      });
-
-      expect(input.value).toBe('');
-    });
-  });
-
-  describe('Uncontrolled NumberInput', () => {
-    it('Doesn\'t update when new props are received', () => {
-      const root = renderIntoDocument(
-        <TestingParentUncontrolled />
-      );
-      const input = findRenderedDOMComponentWithTag(root, 'input');
-
-      /* component was not yet updated */
-      expect(root.state.value).toBe('');
-      expect(input.value).toBe('');
-
-      /* pass new props to NumberInput */
-      root.setState({ value: '123' });
-      expect(input.value).toBe('');
+      expect(typeof recorder[fieldName]).toBe('string');
+      expect(recorder[fieldName]).toBe(expectedValue);
     });
   });
 });

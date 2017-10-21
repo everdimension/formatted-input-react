@@ -1,16 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { createTextMaskInputElement } from 'text-mask-core';
-
-function omit(obj, keys) {
-  const newObj = {};
-  for (const key in obj) {
-    if (!keys.includes(key)) {
-      newObj[key] = obj[key];
-    }
-  }
-  return newObj;
-}
+import omit from './utils/omit';
 
 function isNumeric(n) {
   return !isNaN(Number(n) - parseFloat(n));
@@ -20,17 +11,41 @@ function unformat(numberString) {
   return numberString.replace(/([^\d.-]|\.(?=.*\.)|^\.|(?!^)-)/g, '');
 }
 
-function parse(numberString) {
-  const unformatted = unformat(numberString);
-  if (isNumeric(unformatted)) {
-    return Number(unformatted);
-  }
-  return null;
-}
+// function parse(numberString) {
+//   const unformatted = unformat(numberString);
+//   if (isNumeric(unformatted)) {
+//     return Number(unformatted);
+//   }
+//   return null;
+// }
 
 const propTypes = {
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  onChange: (props, propName, componentName) => {
+    const onChange = props[propName];
+    if (onChange != null && typeof onChange !== 'function') {
+      return new Error(
+        `Invalid prop ${propName} supplied to ${componentName}. ` +
+          'Validation failed',
+      );
+    }
+    if (props.value != null && onChange == null) {
+      return new Error(
+        'You provided a `value` prop to a form field without an `onChange` ' +
+          'handler. This will render a read-only field. If the field should ' +
+          'be mutable use `defaultValue`. Otherwise, set either ' +
+          '`onChange` or `readOnly`.',
+      );
+    }
+    return undefined;
+  },
+};
+
+const defaultProps = {
+  value: null,
+  defaultValue: null,
+  onChange: null,
 };
 
 class NumberInput extends React.PureComponent {
@@ -43,7 +58,6 @@ class NumberInput extends React.PureComponent {
   }
 
   static mask(inputValue = '') {
-    console.log('mask called');
     const cleared = unformat(inputValue);
     if (cleared === '-' || cleared === '-0' || cleared === '-0.') {
       return cleared.split('').map(l => (/\d/.test(l) ? /\d/ : l));
@@ -66,24 +80,21 @@ class NumberInput extends React.PureComponent {
   constructor(props) {
     super(props);
 
-    if ('value' in props && 'defaultValue' in props) {
+    if (props.value != null && props.defaultValue != null) {
       console.error(
         'Both value and defaultValue props are provided to FormattedInput. ' +
-        'Input elements must be either controlled or uncontrolled'
+          'Input elements must be either controlled or uncontrolled',
       );
     }
 
     this.state = {
-      isControlled: 'value' in props,
-      isUncontrolled: 'defaultValue' in props,
+      isControlled: props.value != null,
+      isUncontrolled: props.defaultValue != null,
+      defaultValue: props.defaultValue,
     };
 
     this.mount = this.mount.bind(this);
     this.handleChange = this.handleChange.bind(this);
-  }
-
-  mount(n) {
-    this.node = n;
   }
 
   componentDidMount() {
@@ -99,24 +110,28 @@ class NumberInput extends React.PureComponent {
     }
   }
 
+  mount(n) {
+    this.node = n;
+  }
+
   handleChange(event) {
-    console.log('handleChange');
     this.textMaskInputElement.update(event.target.value);
 
     const modelValue = event.target.value;
+    // if (!this.state.isControlled) {}
     if (modelValue !== this.props.value) {
       this.props.onChange(event.target.name, modelValue);
     }
   }
 
   render() {
-    const { value, defaultValue } = this.props;
+    const { value } = this.props;
     const htmlProps = omit(this.props, ['value', 'defaultValue']);
     const valueProps = {};
     if (this.state.isControlled) {
       valueProps.value = value;
     } else {
-      valueProps.defaultValue = defaultValue;
+      valueProps.defaultValue = this.state.defaultValue;
     }
     return (
       <input
@@ -131,5 +146,6 @@ class NumberInput extends React.PureComponent {
 }
 
 NumberInput.propTypes = propTypes;
+NumberInput.defaultProps = defaultProps;
 
 export default NumberInput;
