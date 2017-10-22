@@ -1,4 +1,4 @@
-/* global describe, it, expect */
+/* global jest, describe, it, expect */
 import React from 'react';
 import {
   Simulate,
@@ -47,7 +47,7 @@ describe('Rendering', () => {
 
 describe('Basic behavior', () => {
   describe('Passes updated value via onChange callback', () => {
-    const recorder = {};
+    const spy = jest.fn();
     const fieldName = 'test-input';
     const expectedValue = '23';
 
@@ -55,9 +55,7 @@ describe('Basic behavior', () => {
       <NumberInput
         name={fieldName}
         value=""
-        onChange={(name, value) => {
-          recorder[name] = value;
-        }}
+        onChange={spy}
       />,
     );
 
@@ -67,13 +65,39 @@ describe('Basic behavior', () => {
       target: input,
     });
 
+    /**
+     * spy.mock.calls represents all calls that have been made
+     * into this mock function. Each call is represented by an array
+     * of arguments that were passed during the call.
+     * http://facebook.github.io/jest/docs/en/mock-function-api.html#mockfnmockcalls
+     */
     it('passes name as the first argument value', () => {
-      expect(fieldName in recorder).toBe(true);
+      const firstCall = spy.mock.calls[0];
+      expect(firstCall[0]).toBe(fieldName);
     });
 
     it('passes correct value as the second argument', () => {
-      expect(typeof recorder[fieldName]).toBe('string');
-      expect(recorder[fieldName]).toBe(expectedValue);
+      const firstCall = spy.mock.calls[0];
+      expect(typeof firstCall[1]).toBe('string');
+      expect(firstCall[1]).toBe(expectedValue);
     });
+  });
+});
+
+describe('Process of initial data', () => {
+  it('Parses initial props when possible', () => {
+    const passedValue = '1234';
+    const expectedValue = new Intl.NumberFormat('en').format(passedValue);
+
+    const root = renderIntoDocument(
+      <NumberInput
+        value={passedValue}
+        onChange={noop}
+      />,
+    );
+
+    const input = findRenderedDOMComponentWithTag(root, 'input');
+
+    expect(input.value).toBe(expectedValue);
   });
 });
