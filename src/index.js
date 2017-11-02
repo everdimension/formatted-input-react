@@ -1,7 +1,17 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { createTextMaskInputElement } from 'text-mask-core';
+import {
+  createTextMaskInputElement,
+  conformToMask,
+  adjustCaretPosition,
+} from 'text-mask-core';
 import omit from './utils/omit';
+import getCursorPosition from './utils/getCursorPosition';
+import setCursorPosition from './utils/setCursorPosition';
+
+function toPlaceholder(mask) {
+  return mask.map(c => (c instanceof RegExp ? '_' : c)).join('');
+}
 
 function isNumeric(n) {
   return !isNaN(Number(n) - parseFloat(n));
@@ -87,10 +97,17 @@ class NumberInput extends React.PureComponent {
       );
     }
 
+    Object.assign(window, {
+      conformToMask,
+      adjustCaretPosition,
+      mask: NumberInput.mask,
+    });
+
     this.state = {
       isControlled: props.value != null,
       isUncontrolled: props.defaultValue != null,
       defaultValue: props.defaultValue,
+      cursorPosition: 0,
     };
 
     this.mount = this.mount.bind(this);
@@ -105,8 +122,21 @@ class NumberInput extends React.PureComponent {
   }
 
   componentDidUpdate(prevProps) {
-    if (this.state.isControlled && prevProps.value !== this.props.value) {
-      this.textMaskInputElement.update(this.props.value);
+    const { value } = this.props;
+    if (this.state.isControlled && prevProps.value !== value) {
+      console.log('updating', this.props.value);
+      // this.textMaskInputElement.update(this.props.value);
+      const newCaretPosition = adjustCaretPosition({
+        previousConformedValue: prevProps.value,
+        previousPlaceholder: toPlaceholder(NumberInput.mask(prevProps.value)),
+        currentCaretPosition: this.state.cursorPosition,
+        conformedValue: value,
+        rawValue: unformat(value),
+        placeholderChar: '_',
+        placeholder: toPlaceholder(NumberInput.mask(value)),
+      });
+      console.log({ newCaretPosition });
+      setCursorPosition(this.node, newCaretPosition);
     }
   }
 
@@ -115,13 +145,25 @@ class NumberInput extends React.PureComponent {
   }
 
   handleChange(event) {
-    this.textMaskInputElement.update(event.target.value);
+    // this.textMaskInputElement.update(event.target.value);
 
-    const modelValue = event.target.value;
+    // const modelValue = event.target.value;
+    const { name, value } = event.target;
+    const { conformedValue } = conformToMask(value, NumberInput.mask(value), {
+      guide: false,
+    });
+    console.log('handleChange', value, conformedValue);
+    console.log('cursorpos', getCursorPosition(event.target));
+    this.setState({
+      cursorPosition: getCursorPosition(event.target),
+    });
+    // if (conformedValue !== value) {
+    // }
+    this.props.onChange(name, conformedValue);
     // if (!this.state.isControlled) {}
-    if (modelValue !== this.props.value) {
-      this.props.onChange(event.target.name, modelValue);
-    }
+    // if (modelValue !== this.props.value) {
+    //   this.props.onChange(event.target.name, modelValue);
+    // }
   }
 
   render() {
@@ -133,6 +175,7 @@ class NumberInput extends React.PureComponent {
     } else {
       valueProps.defaultValue = this.state.defaultValue;
     }
+    console.log('rendering', valueProps);
     return (
       <input
         {...htmlProps}

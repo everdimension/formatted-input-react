@@ -1,7 +1,7 @@
 NumberInput example:
 
 ```js
-initialState = { value: '1234' };
+initialState = { value: '123ss4' };
 <NumberInput
   name="name"
   value={state.value}
