@@ -46,7 +46,7 @@ const defaultProps = {
   onChange: null,
 };
 
-class NumberInput extends React.PureComponent {
+class NumberInput extends React.Component {
   static mask(inputValue = '') {
     const cleared = unformat(inputValue);
     if (cleared === '-' || cleared === '-0' || cleared === '-0.') {
@@ -97,12 +97,13 @@ class NumberInput extends React.PureComponent {
     });
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(prevProps) {
+    console.log('didUpdate', prevProps, this.props);
     const { value } = this.props;
     const { rawValue, cursorPosition } = this.state;
     if (
-      this.state.isControlled &&
-      (prevProps.value !== value || prevState.rawValue !== rawValue)
+      this.state.isControlled
+      // (prevProps.value !== value || prevState.rawValue !== rawValue)
     ) {
       const newCaretPosition = adjustCaretPosition({
         previousConformedValue: prevProps.value,
