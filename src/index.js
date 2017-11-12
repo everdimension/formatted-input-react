@@ -1,23 +1,21 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import { createTextMaskInputElement } from 'text-mask-core';
+import {
+  createTextMaskInputElement,
+  conformToMask,
+  adjustCaretPosition,
+} from 'text-mask-core';
 import omit from './utils/omit';
+import getCursorPosition from './utils/getCursorPosition';
+import setCursorPosition from './utils/setCursorPosition';
 
-function isNumeric(n) {
-  return !isNaN(Number(n) - parseFloat(n));
+function toPlaceholder(mask) {
+  return mask.map(c => (c instanceof RegExp ? '_' : c)).join('');
 }
 
 function unformat(numberString) {
   return numberString.replace(/([^\d.-]|\.(?=.*\.)|^\.|(?!^)-)/g, '');
 }
-
-// function parse(numberString) {
-//   const unformatted = unformat(numberString);
-//   if (isNumeric(unformatted)) {
-//     return Number(unformatted);
-//   }
-//   return null;
-// }
 
 const propTypes = {
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
@@ -48,15 +46,7 @@ const defaultProps = {
   onChange: null,
 };
 
-class NumberInput extends React.PureComponent {
-  static clearValue(value) {
-    const cleared = unformat(value);
-    if (isNumeric(cleared)) {
-      return cleared;
-    }
-    return '';
-  }
-
+class NumberInput extends React.Component {
   static mask(inputValue = '') {
     const cleared = unformat(inputValue);
     if (cleared === '-' || cleared === '-0' || cleared === '-0.') {
@@ -87,10 +77,13 @@ class NumberInput extends React.PureComponent {
       );
     }
 
+    const isControlled = props.value != null;
     this.state = {
-      isControlled: props.value != null,
+      isControlled,
       isUncontrolled: props.defaultValue != null,
       defaultValue: props.defaultValue,
+      cursorPosition: 0,
+      rawValue: isControlled ? props.value : props.defaultValue,
     };
 
     this.mount = this.mount.bind(this);
@@ -105,8 +98,23 @@ class NumberInput extends React.PureComponent {
   }
 
   componentDidUpdate(prevProps) {
-    if (this.state.isControlled && prevProps.value !== this.props.value) {
-      this.textMaskInputElement.update(this.props.value);
+    console.log('didUpdate', prevProps, this.props);
+    const { value } = this.props;
+    const { rawValue, cursorPosition } = this.state;
+    if (
+      this.state.isControlled
+      // (prevProps.value !== value || prevState.rawValue !== rawValue)
+    ) {
+      const newCaretPosition = adjustCaretPosition({
+        previousConformedValue: prevProps.value,
+        previousPlaceholder: toPlaceholder(NumberInput.mask(prevProps.value)),
+        currentCaretPosition: cursorPosition,
+        conformedValue: value,
+        rawValue,
+        placeholderChar: '_',
+        placeholder: toPlaceholder(NumberInput.mask(value)),
+      });
+      setCursorPosition(this.node, newCaretPosition);
     }
   }
 
@@ -115,13 +123,16 @@ class NumberInput extends React.PureComponent {
   }
 
   handleChange(event) {
-    this.textMaskInputElement.update(event.target.value);
-
-    const modelValue = event.target.value;
-    // if (!this.state.isControlled) {}
-    if (modelValue !== this.props.value) {
-      this.props.onChange(event.target.name, modelValue);
-    }
+    // this.textMaskInputElement.update(event.target.value);
+    const { name, value } = event.target;
+    const { conformedValue } = conformToMask(value, NumberInput.mask(value), {
+      guide: false,
+    });
+    this.setState({
+      rawValue: value,
+      cursorPosition: getCursorPosition(event.target),
+    });
+    this.props.onChange(name, conformedValue);
   }
 
   render() {
