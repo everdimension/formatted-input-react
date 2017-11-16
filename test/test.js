@@ -84,10 +84,11 @@ describe('Basic behavior', () => {
   });
 });
 
-describe('Process of initial data', () => {
-  it('Parses initial props when possible', () => {
+describe('Process of initial props', () => {
+  it('Passes initial value as is', () => {
     const passedValue = '1234';
-    const expectedValue = new Intl.NumberFormat('en').format(passedValue);
+    // const expectedValue = new Intl.NumberFormat('en').format(passedValue);
+    const expectedValue = '1234';
 
     const root = renderIntoDocument(
       <NumberInput

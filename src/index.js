@@ -91,30 +91,33 @@ class NumberInput extends React.Component {
   }
 
   componentDidMount() {
-    this.textMaskInputElement = createTextMaskInputElement({
-      inputElement: this.node,
-      mask: NumberInput.mask,
-    });
+    if (this.state.isUncontrolled) {
+      this.textMaskInputElement = createTextMaskInputElement({
+        inputElement: this.node,
+        mask: NumberInput.mask,
+      });
+    }
   }
 
   componentDidUpdate(prevProps) {
-    console.log('didUpdate', prevProps, this.props);
-    const { value } = this.props;
-    const { rawValue, cursorPosition } = this.state;
-    if (
-      this.state.isControlled
-      // (prevProps.value !== value || prevState.rawValue !== rawValue)
-    ) {
-      const newCaretPosition = adjustCaretPosition({
-        previousConformedValue: prevProps.value,
-        previousPlaceholder: toPlaceholder(NumberInput.mask(prevProps.value)),
-        currentCaretPosition: cursorPosition,
-        conformedValue: value,
-        rawValue,
-        placeholderChar: '_',
-        placeholder: toPlaceholder(NumberInput.mask(value)),
-      });
-      setCursorPosition(this.node, newCaretPosition);
+    if (this.state.isControlled) {
+      const { value } = this.props;
+      const { rawValue, cursorPosition } = this.state;
+      if (
+        this.state.isControlled
+        // (prevProps.value !== value || prevState.rawValue !== rawValue)
+      ) {
+        const newCaretPosition = adjustCaretPosition({
+          previousConformedValue: prevProps.value,
+          previousPlaceholder: toPlaceholder(NumberInput.mask(prevProps.value)),
+          currentCaretPosition: cursorPosition,
+          conformedValue: value,
+          rawValue,
+          placeholderChar: '_',
+          placeholder: toPlaceholder(NumberInput.mask(value)),
+        });
+        setCursorPosition(this.node, newCaretPosition);
+      }
     }
   }
 
@@ -123,16 +126,23 @@ class NumberInput extends React.Component {
   }
 
   handleChange(event) {
-    // this.textMaskInputElement.update(event.target.value);
     const { name, value } = event.target;
-    const { conformedValue } = conformToMask(value, NumberInput.mask(value), {
-      guide: false,
-    });
-    this.setState({
-      rawValue: value,
-      cursorPosition: getCursorPosition(event.target),
-    });
-    this.props.onChange(name, conformedValue);
+
+    if (this.state.isUncontrolled) {
+      this.textMaskInputElement.update(value);
+      if (this.props.onChange) {
+        this.props.onChange(name, event.target.value);
+      }
+    } else {
+      const { conformedValue } = conformToMask(value, NumberInput.mask(value), {
+        guide: false,
+      });
+      this.setState({
+        rawValue: value,
+        cursorPosition: getCursorPosition(event.target),
+      });
+      this.props.onChange(name, conformedValue);
+    }
   }
 
   render() {

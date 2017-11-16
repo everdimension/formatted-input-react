@@ -1,5 +1,6 @@
 NumberInput example:
 
+### Controlled
 ```js
 initialState = { value: '123ss4' };
 const handleChange = (name, value) => (console.log(value), setState({ value }));
@@ -40,4 +41,12 @@ class TestComponent extends React.Component {
   }
 }
 <TestComponent />
+```
+
+
+### Uncontrolled
+```js
+<NumberInput
+  defaultValue="1234"
+/>
 ```
