@@ -1,7 +1,7 @@
 {
-  "name": "number-input-react",
+  "name": "formatted-input-react",
   "version": "0.0.1",
-  "description": "a react component for as-you-type digit grouping",
+  "description": "a react component for dynamic input masking",
   "main": "lib/index.js",
   "scripts": {
     "start": "npm run styleguide",
@@ -11,20 +11,21 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+ssh://git@github.com/everdimension/number-input-react.git"
+    "url": "git+ssh://git@github.com/everdimension/formatted-input-react.git"
   },
   "keywords": [
     "react",
-    "number",
+    "mask",
+    "dynamic mask",
     "formatter",
     "input"
   ],
   "author": "everdimension@gmail.com",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/everdimension/number-input-react/issues"
+    "url": "https://github.com/everdimension/formatted-input-react/issues"
   },
-  "homepage": "https://github.com/everdimension/number-input-react#readme",
+  "homepage": "https://github.com/everdimension/formatted-input-react#readme",
   "peerDependencies": {
     "react": "^16.0.0",
     "prop-types": "^15.6.0",

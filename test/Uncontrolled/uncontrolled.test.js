@@ -4,17 +4,22 @@ import {
   renderIntoDocument,
   findRenderedDOMComponentWithTag,
 } from 'react-dom/test-utils';
-import NumberInput from '../../src';
-import StatefulParent from '../StatefulParent';
+import FormattingInput from '../../src';
+import { StatefulParent } from '../StatefulParent';
+import { createMask } from '../createMask';
 
 const noop = () => {};
 
-describe('Uncontrolled NumberInput', () => {
+describe('Uncontrolled FormattingInput', () => {
   it("Doesn't update when new props are received", () => {
     const root = renderIntoDocument(
       <StatefulParent
         render={({ state }) => (
-          <NumberInput defaultValue={state.value} onChange={noop} />
+          <FormattingInput
+            defaultValue={state.value}
+            onChange={noop}
+            mask={createMask}
+          />
         )}
       />,
     );
@@ -24,7 +29,7 @@ describe('Uncontrolled NumberInput', () => {
     expect(root.state.value).toBe('');
     expect(input.value).toBe('');
 
-    /* pass new props to NumberInput */
+    /* pass new props to FormattingInput */
     root.setState({ value: '123' });
     expect(input.value).toBe('');
   });

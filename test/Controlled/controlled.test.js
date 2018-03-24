@@ -5,8 +5,9 @@ import {
   renderIntoDocument,
   findRenderedDOMComponentWithTag,
 } from 'react-dom/test-utils';
-import NumberInput from '../../src';
-import StatefulParent from '../StatefulParent';
+import FormattingInput from '../../src';
+import { StatefulParent } from '../StatefulParent';
+import { createMask } from '../createMask';
 
 const noop = () => {};
 
@@ -15,7 +16,11 @@ describe('Controlled input', () => {
     const root = renderIntoDocument(
       <StatefulParent
         render={({ state }) => (
-          <NumberInput value={state.value} onChange={noop} />
+          <FormattingInput
+            value={state.value}
+            onChange={noop}
+            mask={createMask}
+          />
         )}
       />,
     );
@@ -25,7 +30,7 @@ describe('Controlled input', () => {
     expect(root.state.value).toBe('');
     expect(input.value).toBe('');
 
-    /* pass new props to NumberInput */
+    /* pass new props to FormattingInput */
     root.setState({ value: '123' });
     expect(input.value).toBe('123');
   });
@@ -37,10 +42,11 @@ describe('Controlled input', () => {
       <StatefulParent
         onChange={spy}
         render={({ props, state }) => (
-          <NumberInput
+          <FormattingInput
             name={fieldName}
             value={state.value}
             onChange={props.onChange}
+            mask={createMask}
           />
         )}
       />,
@@ -65,7 +71,11 @@ describe('Controlled input', () => {
       <StatefulParent
         onChange={noop}
         render={({ props, state }) => (
-          <NumberInput value={state.value} onChange={props.onChange} />
+          <FormattingInput
+            value={state.value}
+            onChange={props.onChange}
+            mask={createMask}
+          />
         )}
       />,
     );

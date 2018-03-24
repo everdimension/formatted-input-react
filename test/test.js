@@ -6,14 +6,20 @@ import {
   findRenderedDOMComponentWithTag,
 } from 'react-dom/test-utils';
 import renderer from 'react-test-renderer';
-import NumberInput from '../src';
+import FormattingInput from '../src';
+import { createMask } from './createMask';
 
 const noop = () => {};
 
 describe('Rendering', () => {
   it('Renders a component of type "input"', () => {
     const component = renderer.create(
-      <NumberInput name="test-input" value="" onChange={noop} />,
+      <FormattingInput
+        name="test-input"
+        value=""
+        onChange={noop}
+        mask={createMask}
+      />,
     );
     const tree = component.toJSON();
     expect(tree.type).toBe('input');
@@ -21,7 +27,12 @@ describe('Rendering', () => {
 
   it('Renders a component with correct props', () => {
     const component = renderer.create(
-      <NumberInput name="test-input" value="" onChange={noop} />,
+      <FormattingInput
+        name="test-input"
+        value=""
+        onChange={noop}
+        mask={createMask}
+      />,
     );
     const tree = component.toJSON();
     expect(tree).toMatchSnapshot();
@@ -30,12 +41,13 @@ describe('Rendering', () => {
 
   it('Passses arbitrary html props to rendered input', () => {
     const component = renderer.create(
-      <NumberInput
+      <FormattingInput
         name="test-input"
         value=""
         data-attr="42"
         autocomplete="false"
         onChange={noop}
+        mask={createMask}
       />,
     );
     const tree = component.toJSON();
@@ -52,10 +64,11 @@ describe('Basic behavior', () => {
     const expectedValue = '23';
 
     const root = renderIntoDocument(
-      <NumberInput
+      <FormattingInput
         name={fieldName}
         value=""
         onChange={spy}
+        mask={createMask}
       />,
     );
 
@@ -91,10 +104,7 @@ describe('Process of initial props', () => {
     const expectedValue = '1234';
 
     const root = renderIntoDocument(
-      <NumberInput
-        value={passedValue}
-        onChange={noop}
-      />,
+      <FormattingInput value={passedValue} onChange={noop} mask={createMask} />,
     );
 
     const input = findRenderedDOMComponentWithTag(root, 'input');

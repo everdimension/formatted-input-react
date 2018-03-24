@@ -19,4 +19,4 @@ class StatefulParent extends React.Component {
 
 StatefulParent.propTypes = propTypes;
 
-export default StatefulParent;
+export { StatefulParent };

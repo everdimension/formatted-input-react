@@ -13,13 +13,10 @@ function toPlaceholder(mask) {
   return mask.map(c => (c instanceof RegExp ? '_' : c)).join('');
 }
 
-function unformat(numberString) {
-  return numberString.replace(/([^\d.-]|\.(?=.*\.)|^\.|(?!^)-)/g, '');
-}
-
 const propTypes = {
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   defaultValue: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  mask: PropTypes.func.isRequired,
   onChange: (props, propName, componentName) => {
     const onChange = props[propName];
     if (onChange != null && typeof onChange !== 'function') {
@@ -46,27 +43,7 @@ const defaultProps = {
   onChange: null,
 };
 
-class NumberInput extends React.Component {
-  static mask(inputValue = '') {
-    const cleared = unformat(inputValue);
-    if (cleared === '-' || cleared === '-0' || cleared === '-0.') {
-      return cleared.split('').map(l => (/\d/.test(l) ? /\d/ : l));
-    }
-    const number = Number(cleared);
-    if (isNaN(number)) {
-      return [/\d/];
-    }
-    const formatted = new Intl.NumberFormat('en-US', {
-      maximumFractionDigits: 20,
-    }).format(number);
-    const mask = formatted.split('').map(l => (/\d/.test(l) ? /\d/ : l));
-    if (cleared.endsWith('.')) {
-      mask.push('.');
-    }
-
-    return mask;
-  }
-
+class FormattingInput extends React.Component {
   constructor(props) {
     super(props);
 
@@ -94,14 +71,14 @@ class NumberInput extends React.Component {
     if (this.state.isUncontrolled) {
       this.textMaskInputElement = createTextMaskInputElement({
         inputElement: this.node,
-        mask: NumberInput.mask,
+        mask: this.props.mask,
       });
     }
   }
 
   componentDidUpdate(prevProps) {
     if (this.state.isControlled) {
-      const { value } = this.props;
+      const { value, mask } = this.props;
       const { rawValue, cursorPosition } = this.state;
       if (
         this.state.isControlled
@@ -109,12 +86,12 @@ class NumberInput extends React.Component {
       ) {
         const newCaretPosition = adjustCaretPosition({
           previousConformedValue: prevProps.value,
-          previousPlaceholder: toPlaceholder(NumberInput.mask(prevProps.value)),
+          previousPlaceholder: toPlaceholder(mask(prevProps.value)),
           currentCaretPosition: cursorPosition,
           conformedValue: value,
           rawValue,
           placeholderChar: '_',
-          placeholder: toPlaceholder(NumberInput.mask(value)),
+          placeholder: toPlaceholder(mask(value)),
         });
         setCursorPosition(this.node, newCaretPosition);
       }
@@ -134,7 +111,7 @@ class NumberInput extends React.Component {
         this.props.onChange(name, event.target.value);
       }
     } else {
-      const { conformedValue } = conformToMask(value, NumberInput.mask(value), {
+      const { conformedValue } = conformToMask(value, this.props.mask(value), {
         guide: false,
       });
       this.setState({
@@ -147,7 +124,7 @@ class NumberInput extends React.Component {
 
   render() {
     const { value } = this.props;
-    const htmlProps = omit(this.props, ['value', 'defaultValue']);
+    const htmlProps = omit(this.props, ['value', 'defaultValue', 'mask']);
     const valueProps = {};
     if (this.state.isControlled) {
       valueProps.value = value;
@@ -166,7 +143,7 @@ class NumberInput extends React.Component {
   }
 }
 
-NumberInput.propTypes = propTypes;
-NumberInput.defaultProps = defaultProps;
+FormattingInput.propTypes = propTypes;
+FormattingInput.defaultProps = defaultProps;
 
-export default NumberInput;
+export default FormattingInput;

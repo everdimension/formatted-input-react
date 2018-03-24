@@ -1,19 +1,24 @@
-NumberInput example:
+FormattingInput example:
 
 ### Controlled
 ```js
 initialState = { value: '123ss4' };
 const handleChange = (name, value) => (console.log(value), setState({ value }));
-<NumberInput
+<FormattingInput
   name="name"
   value={state.value}
   onChange={handleChange}
+  mask={require('../test/createMask').createMask}
 />
 ```
 
 ```js
 initialState = { value: '789' };
-<NumberInput value={state.value} onChange={(name, value) => setState({ value })} />
+<FormattingInput
+  value={state.value}
+  onChange={(name, value) => setState({ value })}
+  mask={require('../test/createMask').createMask}
+/>
 ```
 
 Inside isolated TestComponent:
@@ -32,10 +37,11 @@ class TestComponent extends React.Component {
 
   render() {
     return (
-      <NumberInput
+      <FormattingInput
         name="name"
         value={this.state.value}
         onChange={this.handleChange}
+        mask={require('../test/createMask').createMask}
       />
     );
   }
@@ -46,7 +52,8 @@ class TestComponent extends React.Component {
 
 ### Uncontrolled
 ```js
-<NumberInput
+<FormattingInput
   defaultValue="1234"
+  mask={require('../test/createMask').createMask}
 />
 ```
